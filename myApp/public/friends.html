@@ -24,11 +24,12 @@
     <button onclick="listFriends()">List All Friends</button>
 
     <button onclick="getRandomFriend()">Choose Random Friend</button>
+    <div id="show-list-first"></div>
 
     <hr>
 
     <form onsubmit="addNewFriend(event)" method="POST">
-        <label for="newFriendId">New Friend ID:</label><input name="id" id="newFriendId" />
+        <label for="newFriendId">New Friend ID:</label><input placeholder="not required" name="id" id="newFriendId" />
         <label for="newFriendName">New Friend Name:</label><input name="name" id="newFriendName" />
         <label for="newFriendAge">New Friend Age:</label><input name="age" id="newFriendAge" />
         <label for="newFriendGender">New Friend Gender:</label><input name="gender" id="newFriendGender" />
@@ -38,7 +39,11 @@
     </form>
 
     <script>
+        let alertMessageDiv = document.querySelector('#show-list-first')
+        let friendsAmount = 0
+
         function listFriends() {
+
             document.getElementById('friendList').innerText = '';
 
             fetch('/friends/all').then(resp => resp.json())
@@ -51,11 +56,15 @@
                         template.querySelector('.friend-gender').innerText = friend.gender
                         document.getElementById('friendList').appendChild(template)
                     });
+                    friendsAmount = friends.length
+                    if (friendsAmount > 0) { alertMessageDiv.innerText = '' }
                 })
         }
 
         function getRandomFriend() {
-            let randomId = Math.ceil(Math.random() * 3);
+            if (friendsAmount == 0) { alertMessageDiv.innerText = "Show list of friends first" }
+            else if (friendsAmount > 0) { alertMessageDiv.innerText = '' }
+            let randomId = Math.ceil(Math.random() * friendsAmount);
             fetch('/friends/' + randomId).then(resp => resp.json())
                 .then(friend => {
                     document.getElementById('randomFriend').innerText = 'My best friend is ' + friend.name
@@ -96,7 +105,7 @@
             //Get the response body as JSON.
             let res = await fetch(url, fetchOptions);
             let json = await res.json();
-
+            friendsAmount++
             return json;
         }        
     </script>
